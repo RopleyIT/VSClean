@@ -35,32 +35,34 @@
             this.selectFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cleanFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.zIPSourceAndVCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewLogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.txtLog = new System.Windows.Forms.TextBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.progressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.zIPSourceAndVCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem1,
             this.fileToolStripMenuItem,
             this.viewLogToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(646, 24);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(9, 3, 0, 3);
+            this.menuStrip1.Size = new System.Drawing.Size(938, 35);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(12, 20);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(12, 29);
             // 
             // fileToolStripMenuItem
             // 
@@ -70,34 +72,41 @@
             this.cleanFolderToolStripMenuItem,
             this.zIPSourceAndVCToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(50, 29);
             this.fileToolStripMenuItem.Text = "&File";
             // 
             // selectFolderToolStripMenuItem
             // 
             this.selectFolderToolStripMenuItem.Name = "selectFolderToolStripMenuItem";
-            this.selectFolderToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.selectFolderToolStripMenuItem.Size = new System.Drawing.Size(260, 30);
             this.selectFolderToolStripMenuItem.Text = "ZIP source ...";
             this.selectFolderToolStripMenuItem.Click += new System.EventHandler(this.selectFolderToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(260, 30);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // cleanFolderToolStripMenuItem
             // 
             this.cleanFolderToolStripMenuItem.Name = "cleanFolderToolStripMenuItem";
-            this.cleanFolderToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.cleanFolderToolStripMenuItem.Size = new System.Drawing.Size(260, 30);
             this.cleanFolderToolStripMenuItem.Text = "Clean fol&der ...";
             this.cleanFolderToolStripMenuItem.Click += new System.EventHandler(this.cleanFolderToolStripMenuItem_Click);
+            // 
+            // zIPSourceAndVCToolStripMenuItem
+            // 
+            this.zIPSourceAndVCToolStripMenuItem.Name = "zIPSourceAndVCToolStripMenuItem";
+            this.zIPSourceAndVCToolStripMenuItem.Size = new System.Drawing.Size(260, 30);
+            this.zIPSourceAndVCToolStripMenuItem.Text = "ZIP source with VC ...";
+            this.zIPSourceAndVCToolStripMenuItem.Click += new System.EventHandler(this.zipSourceAndVCToolStripMenuItem_Click);
             // 
             // viewLogToolStripMenuItem
             // 
             this.viewLogToolStripMenuItem.Name = "viewLogToolStripMenuItem";
-            this.viewLogToolStripMenuItem.Size = new System.Drawing.Size(64, 20);
+            this.viewLogToolStripMenuItem.Size = new System.Drawing.Size(92, 29);
             this.viewLogToolStripMenuItem.Text = "View log";
             this.viewLogToolStripMenuItem.Click += new System.EventHandler(this.viewLogToolStripMenuItem_Click);
             // 
@@ -106,51 +115,48 @@
             this.txtLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtLog.Location = new System.Drawing.Point(0, 27);
+            this.txtLog.Location = new System.Drawing.Point(0, 42);
+            this.txtLog.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
             this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtLog.Size = new System.Drawing.Size(646, 44);
+            this.txtLog.Size = new System.Drawing.Size(936, 502);
             this.txtLog.TabIndex = 2;
             // 
             // statusStrip1
             // 
+            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.progressBar,
             this.statusLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 74);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 553);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(646, 22);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(2, 0, 21, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(938, 31);
             this.statusStrip1.TabIndex = 3;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // progressBar
             // 
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(100, 16);
+            this.progressBar.Size = new System.Drawing.Size(150, 25);
             // 
             // statusLabel
             // 
             this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(39, 17);
+            this.statusLabel.Size = new System.Drawing.Size(60, 26);
             this.statusLabel.Text = "Ready";
-            // 
-            // zIPSourceAndVCToolStripMenuItem
-            // 
-            this.zIPSourceAndVCToolStripMenuItem.Name = "zIPSourceAndVCToolStripMenuItem";
-            this.zIPSourceAndVCToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.zIPSourceAndVCToolStripMenuItem.Text = "ZIP source with VC ...";
-            this.zIPSourceAndVCToolStripMenuItem.Click += new System.EventHandler(this.zIPSourceAndVCToolStripMenuItem_Click);
             // 
             // FrmVSClean
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(646, 96);
+            this.ClientSize = new System.Drawing.Size(938, 584);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.txtLog);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "FrmVSClean";
             this.Text = "Clean Source";
             this.menuStrip1.ResumeLayout(false);

@@ -71,7 +71,7 @@ namespace WinVSClean
             }
         }
 
-        private void zIPSourceAndVCToolStripMenuItem_Click(object sender, EventArgs e)
+        private void zipSourceAndVCToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ZipSource(true);
         }

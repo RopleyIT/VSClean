@@ -131,24 +131,21 @@ namespace vscleanlib
         {
             "bin", "obj", "TestResults", "debug", "debugpublic",
             "release", "releases", "x64", "x86", "build", "bld",
-            ".vs", "_upgradereport_files", "backup*"
+            ".vs", "_upgradereport_files", "backup*", "packages"
         };
 
         private static string[] extensions = new string[]
         {
             "suo", "user", "userosscache", "sln.docstates",
             "userprefs", "pdb", "vsp", "vspx", "vspscc",
-            "vssscc", "vsmdi", "psess", "mdf", "ldf",
-            "gitattributes", "gitignore"
+            "vssscc", "vsmdi", "psess", //"mdf", "ldf",
+            //"gitattributes", "gitignore"
         };
 
         private static void RecursiveCopy(string root, string target, double min, double max, bool excludeVC)
         {
             if (!Directory.Exists(target))
-            {
-                Notify("Copying folder: " + root, min);
                 Directory.CreateDirectory(target);
-            }
 
             string[] childFolders = Directory.GetDirectories(root);
             double stepSize = (max - min) / (childFolders.Length + 1);
@@ -165,6 +162,8 @@ namespace vscleanlib
                 stepBase += stepSize;
             }
 
+            Notify("Copying folder: " + root, min);
+
             string[] files = Directory.GetFiles(root);
             if (files.Length > 0)
                 stepSize /= files.Length;
@@ -174,7 +173,7 @@ namespace vscleanlib
                 if (!extensions.Any(e => file.EndsWith("." + e, StringComparison.CurrentCultureIgnoreCase)))
                 {
                     string targetFile = Path.Combine(target, Path.GetFileName(file));
-                    Notify("Copying: " + file, stepBase);
+                    Notify("Copying: " + Path.GetFileName(file), stepBase);
                     File.Copy(file, targetFile);
                     File.SetAttributes(targetFile, FileAttributes.Normal);
                     CopiedFiles++;
@@ -182,7 +181,7 @@ namespace vscleanlib
                 }
                 else
                 {
-                    Notify("Skipping: " + file, stepBase);
+                    Notify("Skipping: " + Path.GetFileName(file), stepBase);
                     SkippedFiles++;
                     SkippedBytes += fi.Length;
                 }
@@ -207,6 +206,8 @@ namespace vscleanlib
                 stepBase += stepSize;
             }
 
+            Notify("Cleaning folder: " + root, min);
+
             string[] files = Directory.GetFiles(root);
             if (files.Length > 0)
                 stepSize /= files.Length;
@@ -215,13 +216,13 @@ namespace vscleanlib
                 FileInfo fi = new FileInfo(file);
                 if (!extensions.Any(e => file.EndsWith("." + e, StringComparison.CurrentCultureIgnoreCase)))
                 {
-                    Notify("Keeping: " + file, stepBase);
+                    Notify("Keeping: " + Path.GetFileName(file), stepBase);
                     CopiedFiles++;
                     CopiedBytes += fi.Length;
                 }
                 else
                 {
-                    Notify("Deleting: " + file, stepBase);
+                    Notify("Deleting: " + Path.GetFileName(file), stepBase);
                     File.SetAttributes(file, FileAttributes.Normal);
                     SkippedBytes += fi.Length;
                     SkippedFiles++;

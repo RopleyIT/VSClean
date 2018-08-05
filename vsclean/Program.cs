@@ -15,7 +15,7 @@ namespace vsclean
         {
             if (args.Length < 1 || args.Length > 2)
             {
-                Console.WriteLine("Usage: vsclean [-v] rootFolderName\r\n\t-x\tInclude version control folders");
+                Console.WriteLine("Usage: vsclean [-v] rootFolderName\r\n\t-v\tInclude version control folders");
                 return;
             }
 
