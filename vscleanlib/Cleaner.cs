@@ -22,13 +22,13 @@ namespace vscleanlib
                 ProgressNotify(message, fraction);
         }
 
-        public static long CopiedBytes
+        public static long CopiedFolders
         {
             get;
             private set;
         }
 
-        public static long SkippedBytes
+        public static long SkippedFolders
         {
             get;
             private set;
@@ -48,8 +48,8 @@ namespace vscleanlib
 
         public async static void SourceBackup(string folderPath, bool excludeVC)
         {
-            CopiedBytes = 0;
-            SkippedBytes = 0;
+            CopiedFolders = 0;
+            SkippedFolders = 0;
             CopiedFiles = 0;
             SkippedFiles = 0;
 
@@ -81,14 +81,14 @@ namespace vscleanlib
             ZipFile.CreateFromDirectory(tmpFolder, zipPath, CompressionLevel.Optimal, false);
             Notify("Deleting temporary folder", 0.995);
             Directory.Delete(tmpFolder, true);
-            Notify("Copied: " + CopiedFiles + " (" + CopiedBytes + " bytes), Skipped: "
-                + SkippedFiles + " (" + SkippedBytes + " bytes)", 0.0);
+            Notify("Copied: " + CopiedFiles + " (" + CopiedFolders + " folders), Skipped: "
+                + SkippedFiles + " (" + SkippedFolders + " folders)", 0.0);
         }
 
         public async static void SourceClean(string folderPath)
         {
-            CopiedBytes = 0;
-            SkippedBytes = 0;
+            CopiedFolders = 0;
+            SkippedFolders = 0;
             CopiedFiles = 0;
             SkippedFiles = 0;
 
@@ -109,8 +109,8 @@ namespace vscleanlib
             // Make a copy of the source folder so that the copy can be zipped
 
             await Task.Run(() => RecursiveClean(fullSrcPath, 0.01, 0.99));
-            Notify("Kept: " + CopiedFiles + " (" + CopiedBytes + " bytes), Deleted: "
-                + SkippedFiles + " (" + SkippedBytes + " bytes)", 0.0);
+            Notify("Kept: " + CopiedFiles + " (" + CopiedFolders + " folders), Deleted: "
+                + SkippedFiles + " (" + SkippedFolders + " folders)", 0.0);
         }
 
         private static string GetTempPath()
@@ -158,7 +158,12 @@ namespace vscleanlib
             foreach (string folder in childFolders)
             {
                 if (!filterFolders.Any(f => folder.EndsWith("\\" + f, StringComparison.CurrentCultureIgnoreCase)))
+                {
+                    CopiedFolders++;
                     RecursiveCopy(folder, Path.Combine(target, Path.GetFileName(folder)), stepBase, stepBase + stepSize, excludeVC);
+                }
+                else
+                    SkippedFolders++;
                 stepBase += stepSize;
             }
 
@@ -169,7 +174,6 @@ namespace vscleanlib
                 stepSize /= files.Length;
             foreach (string file in files)
             {
-                FileInfo fi = new FileInfo(file);
                 if (!extensions.Any(e => file.EndsWith("." + e, StringComparison.CurrentCultureIgnoreCase)))
                 {
                     string targetFile = Path.Combine(target, Path.GetFileName(file));
@@ -177,13 +181,11 @@ namespace vscleanlib
                     File.Copy(file, targetFile);
                     File.SetAttributes(targetFile, FileAttributes.Normal);
                     CopiedFiles++;
-                    CopiedBytes += fi.Length;
                 }
                 else
                 {
                     Notify("Skipping: " + Path.GetFileName(file), stepBase);
                     SkippedFiles++;
-                    SkippedBytes += fi.Length;
                 }
                 stepBase += stepSize;
             }
@@ -197,34 +199,35 @@ namespace vscleanlib
             foreach (string folder in childFolders)
             {
                 if (!removableFolders.Any(f => folder.EndsWith("\\" + f, StringComparison.CurrentCultureIgnoreCase)))
+                {
                     RecursiveClean(folder, stepBase, stepBase + stepSize);
+                    CopiedFolders++;
+                }
                 else
                 {
                     Notify("Deleting folder: " + folder, stepBase);
                     Directory.Delete(folder, true);
+                    SkippedFolders++;
                 }
                 stepBase += stepSize;
             }
 
-            Notify("Cleaning folder: " + root, min);
+            Notify("Cleaning folder: " + root, stepBase);
 
             string[] files = Directory.GetFiles(root);
             if (files.Length > 0)
                 stepSize /= files.Length;
             foreach (string file in files)
             {
-                FileInfo fi = new FileInfo(file);
                 if (!extensions.Any(e => file.EndsWith("." + e, StringComparison.CurrentCultureIgnoreCase)))
                 {
                     Notify("Keeping: " + Path.GetFileName(file), stepBase);
                     CopiedFiles++;
-                    CopiedBytes += fi.Length;
                 }
                 else
                 {
                     Notify("Deleting: " + Path.GetFileName(file), stepBase);
                     File.SetAttributes(file, FileAttributes.Normal);
-                    SkippedBytes += fi.Length;
                     SkippedFiles++;
                     File.Delete(file);
                 }
