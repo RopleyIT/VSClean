@@ -76,7 +76,9 @@ namespace vscleanlib
             // Make a copy of the source folder so that the copy can be zipped
 
             string tmpFolder = GetTempPath();
-            await Task.Run(() => RecursiveCopy(fullSrcPath, tmpFolder, 0.01, 0.99, excludeVC));
+            pathFilterParser = new PathFilterParser
+                ((excludeVC ? "/$tf/\r\n/.git/\r\n" : "") + gitIgnoreScript);
+            await Task.Run(() => RecursiveCopy(fullSrcPath, fullSrcPath, tmpFolder, 0.01, 0.99));
             Notify("Creating ZIP: " + zipPath, 0.99);
             ZipFile.CreateFromDirectory(tmpFolder, zipPath, CompressionLevel.Optimal, false);
             Notify("Deleting temporary folder", 0.995);
@@ -108,10 +110,13 @@ namespace vscleanlib
 
             // Make a copy of the source folder so that the copy can be zipped
 
-            await Task.Run(() => RecursiveClean(fullSrcPath, 0.01, 0.99));
+            pathFilterParser = new PathFilterParser(gitIgnoreScript);
+            await Task.Run(() => RecursiveClean(fullSrcPath, fullSrcPath, 0.01, 0.99));
             Notify("Kept: " + CopiedFiles + " (" + CopiedFolders + " folders), Deleted: "
                 + SkippedFiles + " (" + SkippedFolders + " folders)", 0.0);
         }
+
+        private static PathFilterParser pathFilterParser;
 
         private static string GetTempPath()
         {
@@ -122,27 +127,38 @@ namespace vscleanlib
             return tmpPath;
         }
 
-        private static string[] vcFolders = new string[]
-        {
-            "$tf", ".git"
-        };
+        private static string gitIgnoreScript =
+            @"
+                **/bin/
+                **/obj/
+                **/TestResults/
+                **/debug/
+                **/debugpublic/
+                **/release/
+                **/releases/
+                **/x64/
+                **/x86/
+                **/build/
+                **/bld/
+                **/.vs/
+                **/_upgradereport_files/
+                **/backup*/
+                **/packages/
+                *.suo
+                *.user
+                *.userosscache
+                *.sln.docstates
+                *.userprefs
+                *.pdb
+                *.vsp
+                *.vspx
+                *.vspscc
+                *.vssscc
+                *.vsmdi
+                *.psess
+            ";
 
-        private static string[] removableFolders = new string[]
-        {
-            "bin", "obj", "TestResults", "debug", "debugpublic",
-            "release", "releases", "x64", "x86", "build", "bld",
-            ".vs", "_upgradereport_files", "backup*", "packages"
-        };
-
-        private static string[] extensions = new string[]
-        {
-            "suo", "user", "userosscache", "sln.docstates",
-            "userprefs", "pdb", "vsp", "vspx", "vspscc",
-            "vssscc", "vsmdi", "psess", //"mdf", "ldf",
-            //"gitattributes", "gitignore"
-        };
-
-        private static void RecursiveCopy(string root, string target, double min, double max, bool excludeVC)
+        private static void RecursiveCopy(string originalRoot, string root, string target, double min, double max)
         {
             if (!Directory.Exists(target))
                 Directory.CreateDirectory(target);
@@ -151,56 +167,55 @@ namespace vscleanlib
             double stepSize = (max - min) / (childFolders.Length + 1);
             double stepBase = min;
 
-            IEnumerable<string> filterFolders = removableFolders;
-            if (excludeVC)
-                filterFolders = filterFolders.Concat(vcFolders);
-
             foreach (string folder in childFolders)
             {
-                if (!filterFolders.Any(f => folder.EndsWith("\\" + f, StringComparison.CurrentCultureIgnoreCase)))
+                if (!pathFilterParser.DeniesDirectory(folder.Substring(originalRoot.Length)))
                 {
                     CopiedFolders++;
-                    RecursiveCopy(folder, Path.Combine(target, Path.GetFileName(folder)), stepBase, stepBase + stepSize, excludeVC);
+                    RecursiveCopy(originalRoot, folder, Path.Combine(target, Path.GetFileName(folder)), stepBase, stepBase + stepSize);
                 }
                 else
                     SkippedFolders++;
                 stepBase += stepSize;
             }
 
-            Notify("Copying folder: " + root, min);
+            Notify("In folder: " + root, min);
 
             string[] files = Directory.GetFiles(root);
             if (files.Length > 0)
                 stepSize /= files.Length;
             foreach (string file in files)
             {
-                if (!extensions.Any(e => file.EndsWith("." + e, StringComparison.CurrentCultureIgnoreCase)))
+                if (pathFilterParser.Accepts(file.Substring(originalRoot.Length), false))
                 {
                     string targetFile = Path.Combine(target, Path.GetFileName(file));
-                    Notify("Copying: " + Path.GetFileName(file), stepBase);
+                    Notify("    Copying: " + Path.GetFileName(file), stepBase);
                     File.Copy(file, targetFile);
                     File.SetAttributes(targetFile, FileAttributes.Normal);
                     CopiedFiles++;
                 }
                 else
                 {
-                    Notify("Skipping: " + Path.GetFileName(file), stepBase);
+                    Notify("    Skipping: " + Path.GetFileName(file), stepBase);
                     SkippedFiles++;
                 }
                 stepBase += stepSize;
             }
         }
 
-        private static void RecursiveClean(string root, double min, double max)
+        private static void RecursiveClean(string originalRoot, string root, double min, double max)
         {
+            if (!root.StartsWith(originalRoot))
+                throw new ArgumentException("Root not under originalRoot");
+
             string[] childFolders = Directory.GetDirectories(root);
             double stepSize = (max - min) / (childFolders.Length + 1);
             double stepBase = min;
             foreach (string folder in childFolders)
             {
-                if (!removableFolders.Any(f => folder.EndsWith("\\" + f, StringComparison.CurrentCultureIgnoreCase)))
+                if(!pathFilterParser.DeniesDirectory(folder.Substring(originalRoot.Length)))
                 {
-                    RecursiveClean(folder, stepBase, stepBase + stepSize);
+                    RecursiveClean(originalRoot, folder, stepBase, stepBase + stepSize);
                     CopiedFolders++;
                 }
                 else
@@ -212,21 +227,21 @@ namespace vscleanlib
                 stepBase += stepSize;
             }
 
-            Notify("Cleaning folder: " + root, stepBase);
+            Notify("In folder: " + root, stepBase);
 
             string[] files = Directory.GetFiles(root);
             if (files.Length > 0)
                 stepSize /= files.Length;
             foreach (string file in files)
             {
-                if (!extensions.Any(e => file.EndsWith("." + e, StringComparison.CurrentCultureIgnoreCase)))
+                if(pathFilterParser.Accepts(file.Substring(originalRoot.Length), false))
                 {
-                    Notify("Keeping: " + Path.GetFileName(file), stepBase);
+                    Notify("    Keeping: " + Path.GetFileName(file), stepBase);
                     CopiedFiles++;
                 }
                 else
                 {
-                    Notify("Deleting: " + Path.GetFileName(file), stepBase);
+                    Notify("    Deleting: " + Path.GetFileName(file), stepBase);
                     File.SetAttributes(file, FileAttributes.Normal);
                     SkippedFiles++;
                     File.Delete(file);
