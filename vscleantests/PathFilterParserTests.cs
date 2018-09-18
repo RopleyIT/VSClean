@@ -72,6 +72,30 @@ namespace vscleantests
         }
 
         [DataTestMethod]
+        [DataRow("joe/", "C:\\Root\\joe", true, false)]
+        [DataRow("joe/", "C:\\Root\\joe", false, true)]
+        [DataRow("joe", "C:\\Root\\joe", true, false)]
+        [DataRow("joe", "C:\\Root\\joe", false, false)]
+        public void RootFolderPatternTests(string glob, string fnInc, bool isDir, bool included)
+        {
+            var pfp = new PathFilterParser(glob);
+            pfp.RootFolder = "C:\\Root";
+            Assert.IsTrue(pfp.Accepts(fnInc, isDir) == included);
+        }
+
+        [DataTestMethod]
+        [DataRow("joe/*.txt\r\n!joe/*x.txt\r\njoe/xx.txt", "C:\\Root\\joe\\y.txt", false)]
+        [DataRow("joe/*.txt\r\n!joe/*x.txt\r\njoe/xx.txt", "C:\\Root\\joe\\x.txt", true)]
+        [DataRow("joe/*.txt\r\n!joe/*x.txt\r\njoe/xx.txt", "C:\\Root\\joe\\yx.txt", true)]
+        [DataRow("joe/*.txt\r\n!joe/*x.txt\r\njoe/xx.txt", "C:\\Root\\joe\\xx.txt", false)]
+        public void RootFolderPatternLists(string glob, string fnInc, bool included)
+        {
+            var pfp = new PathFilterParser(glob);
+            pfp.RootFolder = "C:\\Root";
+            Assert.IsTrue(pfp.Accepts(fnInc, false) == included);
+        }
+
+        [DataTestMethod]
         [DataRow("joe/*.txt\r\n!joe/*x.txt\r\njoe/xx.txt", "joe/y.txt", false)]
         [DataRow("joe/*.txt\r\n!joe/*x.txt\r\njoe/xx.txt", "joe/x.txt", true)]
         [DataRow("joe/*.txt\r\n!joe/*x.txt\r\njoe/xx.txt", "joe/yx.txt", true)]

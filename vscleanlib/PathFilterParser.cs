@@ -54,8 +54,17 @@ namespace vscleanlib
 
                 filters.Add(new PathFilter(line));
             }
+
+            RootFolder = string.Empty;
         }
 
+        /// <summary>
+        /// The root folder to which all paths in
+        /// this parser are expressed relatively
+        /// </summary>
+
+        public string RootFolder { get; set; }
+        
         /// <summary>
         /// For a give file path, determine if it is still
         /// included despite the gitignore expressions
@@ -66,6 +75,7 @@ namespace vscleanlib
 
         public bool Accepts(string path, bool directory)
         {
+            path = removeRootFolderFromPath(path);
             if (path.StartsWith("/") || path.StartsWith("\\"))
                 path = path.Substring(1);
             bool accepted = true;
@@ -102,12 +112,28 @@ namespace vscleanlib
 
         public bool DeniesDirectory(string path)
         {
+            path = removeRootFolderFromPath(path);
             if (path.StartsWith("/") || path.StartsWith("\\"))
                 path = path.Substring(1);
             return filters.Any(f => 
                 !f.Negative && 
                 f.DirectoryOnly && 
                 f.Pattern.IsMatch(path));
+        }
+
+        private string removeRootFolderFromPath(string path)
+        {
+            // Remove that part of the path which lies above
+            // the root folder. If RootFolder is set to empty,
+            // then we assume 'path' is relative.
+
+            if (!string.IsNullOrEmpty(RootFolder))
+            {
+                if (!path.StartsWith(RootFolder, StringComparison.CurrentCultureIgnoreCase))
+                    throw new ArgumentException("Path outside of root folder");
+                path = path.Substring(RootFolder.Length);
+            }
+            return path;
         }
     }
 }
