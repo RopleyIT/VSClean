@@ -142,6 +142,7 @@ namespace vscleanlib
             **/_upgradereport_files/
             **/backup*/
             **/packages/
+            **/node_modules/
             *.suo
             *.user
             *.userosscache
